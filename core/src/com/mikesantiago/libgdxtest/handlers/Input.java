@@ -5,12 +5,15 @@ public class Input
 	public static boolean[] keys; //current
 	public static boolean[] pkeys; //previous
 	
-	public static final int NUM_KEYS = 4; //make sure this is in line with
+	public static final int NUM_KEYS = 6; //make sure this is in line with
 	
 	public static final int MOVE_UP = 0;  //these
 	public static final int MOVE_LEFT = 1;
 	public static final int MOVE_RIGHT = 2;
 	public static final int MOVE_DOWN = 3;
+	
+	public static final int ADVANCE_COLOR = 4;
+	public static final int RETREAT_COLOR = 5;
 	
 	static
 	{

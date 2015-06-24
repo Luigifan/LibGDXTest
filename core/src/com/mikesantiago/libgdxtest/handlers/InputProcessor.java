@@ -23,6 +23,14 @@ public class InputProcessor extends InputAdapter
 		{
 			Input.setKey(Input.MOVE_RIGHT, true);
 		}
+		if(k == Keys.LEFT_BRACKET)
+		{
+			Input.setKey(Input.RETREAT_COLOR, true);
+		}
+		if(k == Keys.RIGHT_BRACKET)
+		{
+			Input.setKey(Input.ADVANCE_COLOR, true);
+		}
 		return true;
 	}
 	
@@ -44,6 +52,14 @@ public class InputProcessor extends InputAdapter
 		if(k == Keys.RIGHT)
 		{
 			Input.setKey(Input.MOVE_RIGHT, false);
+		}
+		if(k == Keys.LEFT_BRACKET)
+		{
+			Input.setKey(Input.RETREAT_COLOR, false);
+		}
+		if(k == Keys.RIGHT_BRACKET)
+		{
+			Input.setKey(Input.ADVANCE_COLOR, false);
 		}
 		
 		return true;

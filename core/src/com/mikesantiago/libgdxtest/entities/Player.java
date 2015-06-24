@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.Filter;
 import com.mikesantiago.libgdxtest.handlers.Box2DVars;
 import com.mikesantiago.libgdxtest.main.Game;
 
@@ -13,6 +14,8 @@ public class Player extends Box2DSprite
 	private int totalCrystals;
 	private int direction = 1;
 	private boolean isMoving = false;
+	private short[] blockbits = {Box2DVars.BIT_RED, Box2DVars.BIT_GREEN, Box2DVars.BIT_BLUE};
+	private int blockbits_index = 0;
 	
 	public Player(Body body)
 	{
@@ -22,6 +25,34 @@ public class Player extends Box2DSprite
 		setAnimation(spriteFrames, 1 / 12f);
 	}
 
+	/**
+	 * 
+	 * @param dir -1 for backwards, 1 for forwards
+	 */
+	public void setCollisions(int dir)
+	{
+		Filter filter = body.getFixtureList().first().getFilterData();
+		
+		if(dir == 1)
+		{
+			filter.maskBits &= ~blockbits[blockbits_index];
+			if(blockbits_index > blockbits.length - 1)
+				blockbits_index = 0;
+			blockbits_index++;
+			//Box2DVars.BIT_CRYSTAL | blockbits[blockbits_index]
+			filter.maskBits |= blockbits[blockbits_index];
+		}
+		else if(dir == -1)
+		{
+			blockbits_index--;
+			if(blockbits_index < 0)
+				blockbits_index = 0;
+			
+			//Box2DVars.BIT_CRYSTAL | blockbits[blockbits_index]
+			filter.maskBits = (short) (Box2DVars.BIT_CRYSTAL | blockbits[blockbits_index]);
+		}
+	}
+	
 	@Override
 	public void render(SpriteBatch sb)
 	{

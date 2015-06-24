@@ -5,6 +5,8 @@ import static com.mikesantiago.libgdxtest.handlers.Box2DVars.PIXELS_PER_METER;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
@@ -16,9 +18,13 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.ChainShape;
+import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
+import com.mikesantiago.libgdxtest.entities.Crystal;
+import com.mikesantiago.libgdxtest.entities.HUD;
 import com.mikesantiago.libgdxtest.entities.Player;
 import com.mikesantiago.libgdxtest.handlers.Box2DVars;
 import com.mikesantiago.libgdxtest.handlers.GameContactListener;
@@ -35,17 +41,16 @@ public class Play extends GameState{
 	private Box2DDebugRenderer b2dr;
 	private float tileSize = 32;
 	private OrthographicCamera b2dcam;
-	
 	private GameContactListener gcl;
-	
 	private Player player;
-	
 	//World's
 	BodyDef bdef;
 	FixtureDef fdef;
-	
 	private TiledMap tiledMap;
 	private OrthogonalTiledMapRenderer otmr;
+	private Array<Crystal> crystalList;
+	private HUD hud;
+	
 	
 	public Play(GameStateManager gsm)
 	{
@@ -60,13 +65,54 @@ public class Play extends GameState{
 		
 		//Player
 		createPlayer();
-		
 		LoadWorld();
+		createCrystals();
+		
+		//HUD because it needs a non-null player
+		hud = new HUD(player);
 		//Camera
 		b2dcam = new OrthographicCamera();
 		b2dcam.setToOrtho(false, Game.V_WIDTH / PIXELS_PER_METER, Game.V_HEIGHT / PIXELS_PER_METER);
 		
 		
+	}
+	
+	private void createCrystals()
+	{
+		crystalList = new Array<Crystal>();
+		MapLayer layer = tiledMap.getLayers().get("crystals");
+		
+		BodyDef bdef = new BodyDef();
+		FixtureDef fdef = new FixtureDef();
+		
+		if(layer.getObjects().getCount() > 0)
+		{
+			for(MapObject mo: layer.getObjects())
+			{
+				bdef.type = BodyType.StaticBody;
+				float x = (float)mo.getProperties().get("x", float.class) / PIXELS_PER_METER;
+				float y = (float)mo.getProperties().get("y", float.class) / PIXELS_PER_METER;
+			
+				bdef.position.set(x, y);
+			
+				CircleShape cshape = new CircleShape();
+				cshape.setRadius(8 / PIXELS_PER_METER);
+			
+				fdef.shape = cshape;
+				fdef.isSensor = true;
+				fdef.filter.categoryBits = Box2DVars.BIT_CRYSTAL;
+				fdef.filter.maskBits = Box2DVars.BIT_PLAYER;
+			
+				Body body = world.createBody(bdef);
+				
+			
+				Crystal c = new Crystal(body);
+				body.createFixture(fdef).setUserData("Crystal");
+				crystalList.add(c);
+			
+				body.setUserData(c);
+			}
+		}
 	}
 	
 	private void LoadWorld()
@@ -150,7 +196,7 @@ public class Play extends GameState{
 			fdef = new FixtureDef();
 			fdef.shape = shape;
 			fdef.filter.categoryBits = Box2DVars.BIT_PLAYER;
-			fdef.filter.maskBits = Box2DVars.BIT_RED;
+			fdef.filter.maskBits = Box2DVars.BIT_RED | Box2DVars.BIT_CRYSTAL;
 			body.createFixture(fdef).setUserData("BODY");;
 			
 			// A foot sensor!
@@ -193,6 +239,15 @@ public class Play extends GameState{
 				player.getBody().applyForceToCenter(new Vector2(0, 100f), true);
 			}
 		}
+		
+		if(Input.isPressed(Input.ADVANCE_COLOR))
+		{
+			player.setCollisions(1);
+		}
+		else if(Input.isPressed(Input.RETREAT_COLOR))
+		{
+			player.setCollisions(-1);
+		}
 		//player.setMoving(false);
 	}
 	
@@ -200,6 +255,15 @@ public class Play extends GameState{
 	{
 		handleInput();
 		world.step(deltaTime, 6, 2);
+		
+		for(Body b: this.gcl.getBodiesToRemove())
+		{
+			crystalList.removeValue((Crystal)b.getUserData(), true);
+			world.destroyBody(b);
+			player.collectCrystal();
+		}
+		this.gcl.getBodiesToRemove().clear();
+		
 		player.update(deltaTime);
 		
 		if(player != null)
@@ -211,6 +275,11 @@ public class Play extends GameState{
 				System.out.println("player is death");
 			}
 		}
+		
+		for(int i = 0; i < crystalList.size; i++)
+		{
+			crystalList.get(i).update(deltaTime);
+		}
 	}
 	
 	public void render()
@@ -218,11 +287,18 @@ public class Play extends GameState{
 		Gdx.gl.glClear(Gdx.gl20.GL_COLOR_BUFFER_BIT);
 		//draw map
 		otmr.setView(cam);
+		
 		otmr.render();
 		
 		sb.setProjectionMatrix(cam.combined);
+		for(int i = 0; i < crystalList.size; i++)
+		{
+			crystalList.get(i).render(sb);
+		}
 		player.render(sb);
-		b2dr.render(world, b2dcam.combined);
+		//b2dr.render(world, b2dcam.combined);		
+		sb.setProjectionMatrix(hudCam.combined);
+		hud.render(sb);
 	}
 	
 	

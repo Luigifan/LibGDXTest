@@ -50,6 +50,8 @@ public class Game implements ApplicationListener
 		//load any content
 		content = new Content();
 		content.loadTexture("res/images/bunny.png", "bunny");
+		content.loadTexture("res/images/crystal.png", "crystal");
+		content.loadTexture("res/images/hud.png", "hud");
 		
 		Gdx.input.setInputProcessor(new InputProcessor());
 		sb = new SpriteBatch();
