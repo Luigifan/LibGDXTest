@@ -9,11 +9,19 @@ public class InputProcessor extends InputAdapter
 	{
 		if(k == Keys.UP)
 		{
-			Input.setKey(Input.BUTTON1, true);
+			Input.setKey(Input.MOVE_UP, true);
 		}
 		if(k == Keys.DOWN)
 		{
-			Input.setKey(Input.BUTTON2, true);
+			Input.setKey(Input.MOVE_DOWN, true);
+		}
+		if(k == Keys.LEFT)
+		{
+			Input.setKey(Input.MOVE_LEFT, true);
+		}
+		if(k == Keys.RIGHT)
+		{
+			Input.setKey(Input.MOVE_RIGHT, true);
 		}
 		return true;
 	}
@@ -23,11 +31,19 @@ public class InputProcessor extends InputAdapter
 	{
 		if(k == Keys.UP)
 		{
-			Input.setKey(Input.BUTTON1, false);
+			Input.setKey(Input.MOVE_UP, false);
 		}
 		if(k == Keys.DOWN)
 		{
-			Input.setKey(Input.BUTTON2, false);
+			Input.setKey(Input.MOVE_DOWN, false);
+		}
+		if(k == Keys.LEFT)
+		{
+			Input.setKey(Input.MOVE_LEFT, false);
+		}
+		if(k == Keys.RIGHT)
+		{
+			Input.setKey(Input.MOVE_RIGHT, false);
 		}
 		
 		return true;

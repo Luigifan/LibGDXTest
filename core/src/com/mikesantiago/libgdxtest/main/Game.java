@@ -3,7 +3,9 @@ package com.mikesantiago.libgdxtest.main;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.mikesantiago.libgdxtest.handlers.Content;
 import com.mikesantiago.libgdxtest.handlers.GameStateManager;
 import com.mikesantiago.libgdxtest.handlers.Input;
 import com.mikesantiago.libgdxtest.handlers.InputProcessor;
@@ -24,6 +26,7 @@ public class Game implements ApplicationListener
 	
 	private GameStateManager gsm;
 	
+	public static Content content;
 	//
 	
 	public SpriteBatch getSpriteBatch()
@@ -44,6 +47,10 @@ public class Game implements ApplicationListener
 	@Override
 	public void create() 
 	{
+		//load any content
+		content = new Content();
+		content.loadTexture("res/images/bunny.png", "bunny");
+		
 		Gdx.input.setInputProcessor(new InputProcessor());
 		sb = new SpriteBatch();
 		
@@ -54,7 +61,6 @@ public class Game implements ApplicationListener
 		hudCam.setToOrtho(false, V_WIDTH, V_HEIGHT);
 		
 		gsm = new GameStateManager(this);
-		
 	}
 	@Override
 	public void dispose() {
@@ -77,6 +83,12 @@ public class Game implements ApplicationListener
 			gsm.render();
 			Input.update();
 		}
+		
+		/*sb.setProjectionMatrix(hudCam.combined);
+		sb.begin();
+		Texture test = res.getTexture("bunny");
+		sb.draw(test, 0, 0);
+		sb.end();*/ //we can also just draw over EVERYTHING here if we really wanted to..
 		
 	}
 	@Override

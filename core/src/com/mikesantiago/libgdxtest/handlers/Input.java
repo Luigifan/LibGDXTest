@@ -5,9 +5,12 @@ public class Input
 	public static boolean[] keys; //current
 	public static boolean[] pkeys; //previous
 	
-	public static final int NUM_KEYS = 2;
-	public static final int BUTTON1 = 0;
-	public static final int BUTTON2 = 1;
+	public static final int NUM_KEYS = 4; //make sure this is in line with
+	
+	public static final int MOVE_UP = 0;  //these
+	public static final int MOVE_LEFT = 1;
+	public static final int MOVE_RIGHT = 2;
+	public static final int MOVE_DOWN = 3;
 	
 	static
 	{
@@ -26,6 +29,14 @@ public class Input
 	public static boolean isDown(int i)
 	{
 		return keys[i];
+	}
+	
+	public static boolean isUp(int i)
+	{
+		if(keys[i] == false && keys[i] == pkeys[i])
+			return true;
+		else
+			return false;
 	}
 	
 	public static boolean isPressed(int i)
