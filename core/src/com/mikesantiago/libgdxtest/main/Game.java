@@ -5,6 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mikesantiago.libgdxtest.handlers.GameStateManager;
+import com.mikesantiago.libgdxtest.handlers.Input;
+import com.mikesantiago.libgdxtest.handlers.InputProcessor;
 
 public class Game implements ApplicationListener
 {
@@ -40,7 +42,9 @@ public class Game implements ApplicationListener
 	}
 	
 	@Override
-	public void create() {
+	public void create() 
+	{
+		Gdx.input.setInputProcessor(new InputProcessor());
 		sb = new SpriteBatch();
 		
 		cam = new OrthographicCamera();
@@ -71,6 +75,7 @@ public class Game implements ApplicationListener
 			accumulator -= STEP;
 			gsm.update(STEP);
 			gsm.render();
+			Input.update();
 		}
 		
 	}

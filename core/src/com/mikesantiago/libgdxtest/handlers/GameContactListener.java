@@ -16,7 +16,7 @@ public class GameContactListener implements ContactListener
 		Fixture fa = contact.getFixtureA();
 		Fixture fb = contact.getFixtureB();
 		
-		System.out.println(fb.getUserData() + " collided with " + fa.getUserData());
+		//System.out.println(fb.getUserData() + " collided with " + fa.getUserData());
 	}
 
 	//not colliding

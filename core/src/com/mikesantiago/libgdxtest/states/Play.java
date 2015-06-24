@@ -18,6 +18,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.mikesantiago.libgdxtest.handlers.Box2DVars;
 import com.mikesantiago.libgdxtest.handlers.GameContactListener;
 import com.mikesantiago.libgdxtest.handlers.GameStateManager;
+import com.mikesantiago.libgdxtest.handlers.Input;
 import com.mikesantiago.libgdxtest.main.Game;
 
 
@@ -47,58 +48,57 @@ public class Play extends GameState{
 		b2dr = new Box2DDebugRenderer();
 		world.setContactListener(new GameContactListener());
 		
-		//Platform square
+		//Ground
+		BodyDef bdef = new BodyDef();
+		{
+			bdef.position.set(160 / PIXELS_PER_METER, 120 / PIXELS_PER_METER);
+			bdef.type = BodyType.StaticBody;
+		
+			Body b = world.createBody(bdef);
+		
+			PolygonShape shape = new PolygonShape();
+			shape.setAsBox(Game.V_WIDTH / PIXELS_PER_METER, 8 / PIXELS_PER_METER);
+		
+			FixtureDef fdef = new FixtureDef();
+			fdef.shape = shape;
+			fdef.filter.categoryBits = Box2DVars.BIT_GROUND;
+			fdef.filter.maskBits = Box2DVars.BIT_PLAYER;
+			b.createFixture(fdef).setUserData("GROUND");
+		}
+		//Player
 		playerBodyDef = new BodyDef();
-		playerBodyDef.position.set(160 / PIXELS_PER_METER, 120 / PIXELS_PER_METER);
-		playerBodyDef.type = BodyType.StaticBody; //static doesn't move at all, dynamics are always affected by forces, kinematic are not affected by world forces BUT velocities can be changed
-		
-		playerBody = world.createBody(playerBodyDef);
-		
-		PolygonShape shape = new PolygonShape();
-		shape.setAsBox(48 / PIXELS_PER_METER, 8 / PIXELS_PER_METER);
-		
-		playerFixDef = new FixtureDef();
-		playerFixDef.shape = shape;
-		playerFixDef.filter.categoryBits = Box2DVars.BIT_GROUND;
-		playerFixDef.filter.maskBits = Box2DVars.BIT_BOX | Box2DVars.BIT_BALL;
-		fixture = playerBody.createFixture(playerFixDef);
-		fixture.setUserData("GROUND");
-		
-		//Small, raised up square
-		playerBodyDef.position.set(160 / PIXELS_PER_METER, 200 / PIXELS_PER_METER);
-		playerBodyDef.type = BodyType.DynamicBody;
-		
-		playerBody = world.createBody(playerBodyDef);
-		
-		shape.setAsBox(10 / PIXELS_PER_METER, 10 / PIXELS_PER_METER);
-		
-		playerFixDef.restitution = 1f;
-		playerFixDef.filter.categoryBits = Box2DVars.BIT_BOX;
-		playerFixDef.filter.maskBits = Box2DVars.BIT_GROUND;
-		fixture = playerBody.createFixture(playerFixDef);
-		fixture.setUserData("BOX");
-		
-		
-		//Ball
-		playerBodyDef.position.set(160 / PIXELS_PER_METER, 200 / PIXELS_PER_METER);
-		playerBody = world.createBody(playerBodyDef);
-		
-		CircleShape circle = new CircleShape();
-		circle.setRadius(5 / PIXELS_PER_METER);
-		playerFixDef.shape = circle;
-		playerFixDef.filter.categoryBits = Box2DVars.BIT_BALL;
-		playerFixDef.filter.maskBits = Box2DVars.BIT_GROUND;
-		fixture = playerBody.createFixture(playerFixDef);
-		fixture.setUserData("BALL");
+		{
+			playerBodyDef.position.set(160 / PIXELS_PER_METER, 160 / PIXELS_PER_METER);
+			playerBodyDef.type = BodyType.StaticBody;
+			
+			playerBody = world.createBody(playerBodyDef);
+			
+			PolygonShape shape = new PolygonShape();
+			shape.setAsBox(16 / PIXELS_PER_METER, 16 / PIXELS_PER_METER);
+			
+			playerFixDef = new FixtureDef();
+			playerFixDef.shape = shape;
+			playerFixDef.filter.categoryBits = Box2DVars.BIT_PLAYER;
+			playerFixDef.filter.maskBits = Box2DVars.BIT_GROUND;
+			playerBody.createFixture(playerFixDef);
+		}
 		
 		//Camera
 		b2dcam = new OrthographicCamera();
 		b2dcam.setToOrtho(false, Game.V_WIDTH / PIXELS_PER_METER, Game.V_HEIGHT / PIXELS_PER_METER);
+		//b2dcam.setToOrtho(false, playerBodyDef.position.x, playerBodyDef.position.y);
 	}
 	
 	public void handleInput()
 	{
-		
+		if(Input.isDown(Input.BUTTON1))
+		{
+			System.out.println("moving up");
+			Vector2 newPosition = new Vector2(playerBodyDef.position.x, playerBodyDef.position.y - 2);
+			playerBodyDef.linearVelocity.set(0, 1);
+			playerBody.setTransform(playerBodyDef.position, 0);
+			playerBodyDef.position.set(newPosition);
+		}
 	}
 	public void update(float deltaTime)
 	{
